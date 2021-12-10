@@ -16,7 +16,7 @@ router.post("/signin", async (req, res) => {
         .status(404)
         .json({ error: "User with this email doesn't exist" });
     }
-    const samePassword = await bcrypt.compare(password, user.password)
+    const samePassword = await bcrypt.compare(password, user.password);
     if (!samePassword) {
       return res.status(400).json({ error: "Wrong password" });
     }
@@ -44,6 +44,33 @@ router.post("/signup", async (req, res) => {
     ) {
       return res.status(400).json({ error: "Fill all inputs" });
     }
+
+    const uploadAvatar = async () => {
+      if (!!req.files?.avatar) {
+        const fileContent = Buffer.from(req.files.avatar.data, "binary");
+        const params = {
+          Bucket: process.env.S3_BUCKET,
+          Key: req.files.avatar.name,
+          Body: fileContent,
+        };
+        const stored = await req.app
+          .get("s3")
+          .upload(params, (err, data) => {
+            if (err) {
+              console.log(err.message);
+              return res.status(500).json({
+                error: "Problems with uploading avatar",
+              });
+            }
+            return data;
+          })
+          .promise();
+        const url = await stored.Location;
+        return url;
+      }
+    };
+    const avatar = await uploadAvatar();
+
     const candidate = await User.findOne({ email });
     if (!!candidate) {
       return res
@@ -55,6 +82,7 @@ router.post("/signup", async (req, res) => {
       password,
       phone,
       name,
+      avatar,
     });
     user.save(err => {
       if (err) {

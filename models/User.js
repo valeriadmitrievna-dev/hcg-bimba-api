@@ -5,7 +5,11 @@ const saltRounds = 10;
 const schema = new Schema({
   email: { type: String, required: true, unic: true, trim: true },
   password: { type: String, required: true, trim: true },
-  avatar: { type: String, default: "" },
+  avatar: {
+    type: String,
+    default:
+      "https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg",
+  },
   name: { type: String, required: true },
   phone: { type: String },
 });
