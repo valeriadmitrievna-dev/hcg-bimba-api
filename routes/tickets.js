@@ -17,7 +17,7 @@ router.post("/", withAuth, async (req, res) => {
     }
     const owner = await User.findOne({ _id: id });
     if (!owner) {
-      return res.status(500).json({ error: "User not found, invalid token" });
+      return res.status(500).json({ error: "User not found or invalid token" });
     }
     const carwash = await Carwash.findOne({ _id: carwashID });
     if (!carwash) {

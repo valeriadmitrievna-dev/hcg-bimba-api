@@ -4,6 +4,8 @@ const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Carwash = require("../models/Carwash");
+const Admin = require("../models/Admin");
+const withAuth = require('../middlewares/auth')
 
 const weekdays = [
   "monday",
@@ -91,37 +93,57 @@ router.post("/create/suggestions", async (req, res) => {
 
 router.post("/create", async (req, res) => {
   try {
-    const { carwash, email, password } = req.body;
-    if (!email.length || !password.length) {
+    const { carwash, email, password, name, phone } = req.body;
+    if (
+      !email?.length ||
+      !password?.length ||
+      !name?.length ||
+      !phone?.length
+    ) {
       return res.status(400).json({ error: "Fill all inputs" });
     }
+
     if (!carwash) {
       return res.status(400).json({ error: "Choose car wash" });
     }
-    const candidate = await Carwash.findOne({
+
+    const candidate_admin = await Admin.findOne({
+      email,
+    });
+    if (!!candidate_admin) {
+      return res.status(400).json({
+        error: "Admin with this email already registered",
+      });
+    }
+
+    const candidate_carwash = await Carwash.findOne({
       companyID: carwash.companyID,
     });
-    if (!!candidate) {
+    if (!!candidate_carwash) {
       return res.status(400).json({
         error: "This car wash is already registered",
       });
     }
+
     const _carwash = new Carwash({
       ...carwash,
+    });
+    const admin = new Admin({
       email,
+      name,
       password,
+      carwashes: [_carwash],
     });
-    _carwash.save(err => {
-      if (err) {
-        return res.status(500).json({ error: "Error on saving car wash" });
-      }
-    });
-    const token = jwt.sign({ id: _carwash._id }, process.env.SECRET, {
+
+    await _carwash.save();
+    await admin.save();
+
+    const token = jwt.sign({ id: admin._id }, process.env.SECRET, {
       expiresIn: "24h",
     });
-    return res.status(200).json({ token, carwash: _carwash });
+    return res.status(200).json({ token, admin });
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -151,6 +173,44 @@ router.post("/signin", async (req, res) => {
     });
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/add", withAuth, async (req, res) => {
+  try {
+    const { carwash } = req.body;
+    const { id } = req.decoded;
+
+    const admin = await Admin.findOne({ _id: id });
+    if (!admin) {
+      return res.status(404).json({ error: "User not found or invalid token" });
+    }
+
+    if (!carwash) {
+      return res.status(400).json({ error: "Choose car wash" });
+    }
+
+    const candidate_carwash = await Carwash.findOne({
+      companyID: carwash.companyID,
+    });
+    if (!!candidate_carwash) {
+      return res.status(400).json({
+        error: "This car wash is already registered",
+      });
+    }
+
+    const _carwash = new Carwash({
+      ...carwash,
+    });
+    admin.carwashes = [...admin.carwashes, _carwash];
+
+    await _carwash.save();
+    await admin.save();
+
+    return res.status(200).json({ carwash: _carwash });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
