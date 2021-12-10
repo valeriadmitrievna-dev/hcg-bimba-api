@@ -10,16 +10,16 @@ const port = process.env.PORT || 8000;
 
 app.use(
   cors({
-    origin:
-      process.env.NODE === "development"
-        ? process.env.APP_DEV
-        : process.env.APP_ORIGIN,
+    origin: process.env.APP,
     credentials: true,
   })
 );
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
-// app.use(fileupload());
+
+app.use("/washes", require("./routes/washes"));
+app.use("/user", require("./routes/users"));
+app.use("/ticket", require("./routes/tickets"));
 
 async function start() {
   try {
