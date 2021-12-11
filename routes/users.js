@@ -117,4 +117,48 @@ router.get("/check", withAuth, async (req, res) => {
   }
 });
 
+router.put("/", withAuth, async (req, res) => {
+  try {
+    const { id } = req.decoded;
+    const { email, name, phone } = req.body;
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+      return res.status(400).json({ error: "User doen't exist" });
+    }
+    const uploadAvatar = async () => {
+      if (!!req.files?.avatar) {
+        const fileContent = Buffer.from(req.files.avatar.data, "binary");
+        const params = {
+          Bucket: process.env.S3_BUCKET,
+          Key: req.files.avatar.name,
+          Body: fileContent,
+        };
+        const stored = await req.app
+          .get("s3")
+          .upload(params, (err, data) => {
+            if (err) {
+              console.log(err.message);
+              return res.status(500).json({
+                error: "Problems with updating avatar",
+              });
+            }
+            return data;
+          })
+          .promise();
+        const url = await stored.Location;
+        return url;
+      } else return user.avatar;
+    };
+    user.avatar = await uploadAvatar();
+    user.name = name;
+    user.email = email;
+    user.phone = phone;
+    await user.save();
+    return res.status(200).json(user);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
