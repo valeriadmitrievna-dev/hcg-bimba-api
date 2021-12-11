@@ -5,25 +5,70 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Carwash = require("../models/Carwash");
 const Admin = require("../models/Admin");
-const withAuth = require('../middlewares/auth')
+const withAuth = require("../middlewares/auth");
 
 const weekdays = [
   "monday",
   "tuesday",
   "wednesday",
-  "thirsday",
+  "thursday",
   "friday",
   "saturday",
   "sunday",
 ];
 
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { location } = req.body;
-    const url_location = location || "38.89524795507812,47.22615523694117";
-    const url = `https://search-maps.yandex.ru/v1/?apikey=086119b9-9e83-4e2e-9b39-c769c5bfb68f&text=автомойка&lang=ru_RU&type=biz&ll=${url_location}&spn=0.1737213134765625,0.06899380920912535`;
-    const response = await axios.get(encodeURI(url));
-    res.status(200).json(response.data.features);
+    // const { location } = req.body;
+    // const url =
+    //   "https://search-maps.yandex.ru/v1/?apikey=" +
+    //   process.env.YANDEX_API_KEY +
+    //   "&text=автомойка&lang=ru_RU&type=biz&ll=" +
+    //   location +
+    //   "&spn=0.1737213134765625,0.06899380920912535&results=20";
+    // const response = await axios.get(encodeURI(url));
+    // const data = response.data.features
+    //   .filter(r =>
+    //     r.properties.CompanyMetaData.Categories.some(c => c.class === "auto")
+    //   )
+    //   .map(s => ({
+    //     coordinates: s.geometry.coordinates.join(","),
+    //     name: s.properties.name,
+    //     address: s.properties.CompanyMetaData.address.replace(
+    //       "Россия, Ростовская область, Таганрог, ",
+    //       ""
+    //     ),
+    //     companyID: s.properties.CompanyMetaData.id,
+    //     phones: s.properties.CompanyMetaData.Phones?.map(p => p.formatted),
+    //     url: s.properties.CompanyMetaData.url,
+    //     availabilities: s.properties.CompanyMetaData.Hours?.Availabilities.map(
+    //       a => {
+    //         if (a[0]?.Everyday || a?.Everyday) {
+    //           return weekdays.map(wd => ({
+    //             weekday: wd.toLowerCase(),
+    //             from:
+    //               a[0]?.TwentyFourHours || a?.TwentyFourHours
+    //                 ? "00:00:00"
+    //                 : a.Intervals[0].from,
+    //             to:
+    //               a[0]?.TwentyFourHours || a?.TwentyFourHours
+    //                 ? "23:59:59"
+    //                 : a.Intervals[0].to,
+    //           }));
+    //         } else {
+    //           return Object.keys(a)
+    //             .filter(wd => wd !== "Intervals")
+    //             .map(wd => ({
+    //               weekday: wd.toLowerCase(),
+    //               from: a.Intervals?.length && a.Intervals[0].from,
+    //               to: a.Intervals?.length && a.Intervals[0].to,
+    //             }));
+    //         }
+    //       }
+    //     ).flat(),
+    //   }));
+    const data = await Carwash.find()
+    res.status(200).json(data);
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "Internal server error" });

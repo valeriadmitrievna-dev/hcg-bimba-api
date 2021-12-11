@@ -3,6 +3,7 @@ const router = Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const withAuth = require("../middlewares/auth");
 
 router.post("/signin", async (req, res) => {
   try {
@@ -74,7 +75,7 @@ router.post("/signup", async (req, res) => {
     const candidate = await User.findOne({ email });
     if (!!candidate) {
       return res
-        .status(404)
+        .status(400)
         .json({ error: "User with this email already exists" });
     }
     const user = new User({
@@ -96,6 +97,20 @@ router.post("/signup", async (req, res) => {
       token,
       user,
     });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/check", withAuth, async (req, res) => {
+  try {
+    const { id } = req.decoded;
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+      return res.status(400).json({ error: "User doen't exist" });
+    }
+    return res.status(200).json(user);
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "Internal server error" });
