@@ -19,7 +19,7 @@ const weekdays = [
 
 router.post("/", async (req, res) => {
   try {
-    // const { location } = req.body;
+    const { location } = req.body;
     // const url =
     //   "https://search-maps.yandex.ru/v1/?apikey=" +
     //   process.env.YANDEX_API_KEY +
@@ -28,11 +28,11 @@ router.post("/", async (req, res) => {
     //   "&spn=0.5,0.3&results=50";
     // const response = await axios.get(encodeURI(url));
     // const types = [
-    //   "contact wash",
-    //   "hand wash",
-    //   "self-service car wash",
-    //   "steam wash",
-    //   "robot washing",
+    //   "Контактная мойка",
+    //   "Ручная мойка",
+    //   "Мойка самообслуживания",
+    //   "Мойка паром",
+    //   "Робот-мойка",
     // ];
     // const data = response.data.features
     //   .filter(r =>
