@@ -6,6 +6,7 @@ const schema = new Schema({
   address: { type: String, required: true },
   phones: [{ type: String }],
   url: { type: String },
+  type: { type: String },
   companyID: { type: String, required: true },
   availabilities: [
     {

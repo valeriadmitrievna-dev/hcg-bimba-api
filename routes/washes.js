@@ -27,18 +27,25 @@ router.post("/", async (req, res) => {
     //   location +
     //   "&spn=0.5,0.3&results=50";
     // const response = await axios.get(encodeURI(url));
+    // const types = [
+    //   "contact wash",
+    //   "hand wash",
+    //   "self-service car wash",
+    //   "steam wash",
+    //   "robot washing",
+    // ];
     // const data = response.data.features
     //   .filter(r =>
     //     r.properties.CompanyMetaData.Categories.some(c => c.class === "auto")
     //   )
     //   .map(s => ({
-    //     _id: s.properties.CompanyMetaData.id,
     //     coordinates: s.geometry.coordinates.join(","),
     //     name: s.properties.name,
     //     address: s.properties.CompanyMetaData.address.replace(
     //       "Россия, Ростовская область, Таганрог, ",
     //       ""
     //     ),
+    //     // _id: s.properties.CompanyMetaData.id,
     //     companyID: s.properties.CompanyMetaData.id,
     //     phones: s.properties.CompanyMetaData.Phones?.map(p => p.formatted),
     //     url: s.properties.CompanyMetaData.url,
@@ -67,14 +74,14 @@ router.post("/", async (req, res) => {
     //         }
     //       }
     //     ).flat(),
+    //     type: types[Math.floor(Math.random() * types.length)],
     //   }));
-    const data = await Carwash.find();
-    res.status(200).json(
-      data
-        .map(value => ({ value, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ value }) => value)
-    );
+    // for (const c of data) {
+    //   const carwash = new Carwash({ ...c });
+    //   await carwash.save();
+    // }
+    const data = await Carwash.find()
+    res.status(200).json(data);
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "Internal server error" });
