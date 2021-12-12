@@ -25,13 +25,14 @@ router.post("/", async (req, res) => {
     //   process.env.YANDEX_API_KEY +
     //   "&text=автомойка&lang=ru_RU&type=biz&ll=" +
     //   location +
-    //   "&spn=0.1737213134765625,0.06899380920912535&results=20";
+    //   "&spn=0.5,0.3&results=50";
     // const response = await axios.get(encodeURI(url));
     // const data = response.data.features
     //   .filter(r =>
     //     r.properties.CompanyMetaData.Categories.some(c => c.class === "auto")
     //   )
     //   .map(s => ({
+    //     _id: s.properties.CompanyMetaData.id,
     //     coordinates: s.geometry.coordinates.join(","),
     //     name: s.properties.name,
     //     address: s.properties.CompanyMetaData.address.replace(
@@ -67,8 +68,13 @@ router.post("/", async (req, res) => {
     //       }
     //     ).flat(),
     //   }));
-    const data = await Carwash.find()
-    res.status(200).json(data);
+    const data = await Carwash.find();
+    res.status(200).json(
+      data
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value)
+    );
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "Internal server error" });

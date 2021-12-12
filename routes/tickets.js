@@ -23,6 +23,10 @@ router.post("/", withAuth, async (req, res) => {
     if (!carwash) {
       return res.status(500).json({ error: "Car wash not found, invalid id" });
     }
+    const candidateTicket = await Ticket.findOne({ datetime, carwash });
+    if (candidateTicket) {
+      return res.status(400).json({ error: "Choose another time" });
+    }
     const ticket = new Ticket({
       created: new Date(),
       owner,
@@ -34,7 +38,7 @@ router.post("/", withAuth, async (req, res) => {
         return res.status(500).json({ error: "Error on saving ticket" });
       }
     });
-    res.status(200).json(ticket);
+    res.status(200).json({ success: true });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: "Internal server error" });
